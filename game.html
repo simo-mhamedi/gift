@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salwa's Love Adventure</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e, #ffafaf);
+            color: white;
+            min-height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            max-width: 500px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        /* Screens */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: transform 0.5s ease;
+        }
+
+        .start-screen {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            z-index: 10;
+        }
+
+        .game-screen {
+            transform: translateX(100%);
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+        }
+
+        .win-screen {
+            transform: translateX(100%);
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            text-align: center;
+        }
+
+        /* Start Screen */
+        .title {
+            font-size: 2.8rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 1.4rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            opacity: 0.9;
+        }
+
+        .salwa-name {
+            color: #ffeb3b;
+            font-family: 'Brush Script MT', cursive;
+            font-size: 3.2rem;
+            display: block;
+            margin: 1rem 0;
+        }
+
+        .start-btn {
+            background: white;
+            color: #ff6b6b;
+            border: none;
+            padding: 1.2rem 2.5rem;
+            font-size: 1.4rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-weight: bold;
+            margin-top: 2rem;
+        }
+
+        .start-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Game Screen */
+        .game-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 5;
+        }
+
+        .score-container, .timer-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 50px;
+            color: #ff6b6b;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .game-area {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            user-select: none;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .heart:active {
+            transform: scale(1.3);
+        }
+
+        .obstacle {
+            position: absolute;
+            font-size: 2rem;
+            user-select: none;
+            animation: fall linear forwards;
+        }
+
+        .power-up {
+            position: absolute;
+            font-size: 2rem;
+            animation: float 2s ease-in-out infinite;
+            cursor: pointer;
+        }
+
+        .power-up:active {
+            transform: scale(1.5);
+        }
+
+        /* Controls */
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 20px;
+        }
+
+        .control-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            color: #ff6b6b;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:active {
+            transform: scale(0.9);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        /* Win Screen */
+        .win-title {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+
+        .final-score {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            color: #4ecdc4;
+        }
+
+        .win-message {
+            font-size: 1.5rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .restart-btn {
+            background: white;
+            color: #4ecdc4;
+            border: none;
+            padding: 1.2rem 2.5rem;
+            font-size: 1.4rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-weight: bold;
+        }
+
+        .restart-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        @keyframes fall {
+            to { transform: translateY(100vh); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+        }
+
+        /* Effects */
+        .effect {
+            position: absolute;
+            pointer-events: none;
+            font-size: 1.5rem;
+            animation: fadeOut 1s forwards;
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+
+        .message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            color: #ff6b6b;
+            font-size: 1.3rem;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            text-align: center;
+            max-width: 80%;
+        }
+
+        /* Hearts background */
+        .hearts-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .bg-heart {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.3;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 380px) {
+            .title { font-size: 2.2rem; }
+            .salwa-name { font-size: 2.5rem; }
+            .subtitle { font-size: 1.2rem; }
+            .control-btn { width: 60px; height: 60px; }
+        }
+
+        @media (max-height: 700px) {
+            .controls { bottom: 10px; }
+            .control-btn { width: 60px; height: 60px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Start Screen -->
+        <div class="screen start-screen" id="startScreen">
+            <h1 class="title">Salwa's<br>Love Adventure</h1>
+            <span class="salwa-name">For My Salwa</span>
+            <p class="subtitle">Collect hearts and avoid obstacles<br>to show your love!</p>
+            <div class="hearts-bg" id="heartsBg"></div>
+            <button class="start-btn" id="startBtn">
+                <i class="fas fa-play"></i> Start Game
+            </button>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="screen game-screen" id="gameScreen">
+            <div class="game-header">
+                <div class="score-container">
+                    <i class="fas fa-heart"></i> <span id="score">0</span>
+                </div>
+                <div class="timer-container">
+                    <i class="fas fa-clock"></i> <span id="timer">60</span>s
+                </div>
+            </div>
+            <div class="game-area" id="gameArea">
+                <!-- Hearts, obstacles and power-ups will be generated here -->
+            </div>
+            <div class="controls">
+                <div class="control-btn" id="leftBtn">
+                    <i class="fas fa-arrow-left"></i>
+                </div>
+                <div class="control-btn" id="actionBtn">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <div class="control-btn" id="rightBtn">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Win Screen -->
+        <div class="screen win-screen" id="winScreen">
+            <h2 class="win-title">You Win! 💖</h2>
+            <div class="final-score">
+                Score: <span id="finalScore">0</span>
+            </div>
+            <p class="win-message">
+                Your love for <span class="salwa-name">Salwa</span> conquered all obstacles! 
+                You're the best partner ever!
+            </p>
+            <button class="restart-btn" id="restartBtn">
+                <i class="fas fa-redo"></i> Play Again
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Game elements
+        const startScreen = document.getElementById('startScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const winScreen = document.getElementById('winScreen');
+        const startBtn = document.getElementById('startBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const gameArea = document.getElementById('gameArea');
+        const scoreElement = document.getElementById('score');
+        const timerElement = document.getElementById('timer');
+        const finalScoreElement = document.getElementById('finalScore');
+        const heartsBg = document.getElementById('heartsBg');
+        
+        // Control buttons
+        const leftBtn = document.getElementById('leftBtn');
+        const rightBtn = document.getElementById('rightBtn');
+        const actionBtn = document.getElementById('actionBtn');
+
+        // Game variables
+        let score = 0;
+        let timeLeft = 60;
+        let gameInterval;
+        let timerInterval;
+        let playerX = 50;
+        let isGameActive = false;
+        
+        // Love messages for Salwa
+        const messages = [
+            "Salwa! 💕",
+            "I Love You!",
+            "My Heart!",
+            "So Beautiful!",
+            "Amazing!",
+            "Perfect!",
+            "My Queen!",
+            "Forever!",
+            "My Everything!",
+            "Best Wife!"
+        ];
+
+        // Initialize background hearts
+        function initBackgroundHearts() {
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'bg-heart';
+                heart.innerHTML = '💖';
+                heart.style.left = `${Math.random() * 100}%`;
+                heart.style.top = `${Math.random() * 100}%`;
+                heart.style.animationDelay = `${Math.random() * 5}s`;
+                heart.style.fontSize = `${Math.random() * 1 + 1}rem`;
+                heartsBg.appendChild(heart);
+            }
+        }
+
+        // Show message effect
+        function showMessage(text, x, y) {
+            const message = document.createElement('div');
+            message.className = 'message';
+            message.textContent = text;
+            message.style.left = `${x}%`;
+            message.style.top = `${y}%`;
+            gameArea.appendChild(message);
+            
+            setTimeout(() => {
+                message.style.opacity = '1';
+            }, 10);
+            
+            setTimeout(() => {
+                message.style.opacity = '0';
+                setTimeout(() => {
+                    gameArea.removeChild(message);
+                }, 300);
+            }, 1500);
+        }
+
+        // Create collectible heart
+        function createHeart() {
+            if (!isGameActive) return;
+            
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.innerHTML = '💖';
+            heart.style.left = `${Math.random() * 80 + 10}%`;
+            heart.style.top = `${Math.random() * 50 + 10}%`;
+            heart.style.animationDelay = `${Math.random() * 2}s`;
+            heart.style.color = `hsl(${Math.random() * 360}, 100%, 65%)`;
+            
+            heart.addEventListener('click', () => {
+                collectHeart(heart);
+            });
+            
+            gameArea.appendChild(heart);
+            
+            // Remove heart after some time if not collected
+            setTimeout(() => {
+                if (heart.parentNode) {
+                    gameArea.removeChild(heart);
+                }
+            }, 5000);
+        }
+
+        // Collect heart
+        function collectHeart(heart) {
+            if (!isGameActive) return;
+            
+            score += 10;
+            scoreElement.textContent = score;
+            
+            // Create effect
+            const effect = document.createElement('div');
+            effect.className = 'effect';
+            effect.innerHTML = '+10 💖';
+            effect.style.left = heart.style.left;
+            effect.style.top = heart.style.top;
+            effect.style.color = 'gold';
+            gameArea.appendChild(effect);
+            
+            // Show random message
+            const message = messages[Math.floor(Math.random() * messages.length)];
+            showMessage(message, parseFloat(heart.style.left), parseFloat(heart.style.top) - 10);
+            
+            // Remove heart
+            gameArea.removeChild(heart);
+            
+            // Play sound effect (visual feedback instead)
+            heart.style.transform = 'scale(1.5)';
+            setTimeout(() => {
+                if (effect.parentNode) {
+                    gameArea.removeChild(effect);
+                }
+            }, 1000);
+        }
+
+        // Create obstacle
+        function createObstacle() {
+            if (!isGameActive) return;
+            
+            const obstacle = document.createElement('div');
+            obstacle.className = 'obstacle';
+            obstacle.innerHTML = '💔';
+            obstacle.style.left = `${Math.random() * 80 + 10}%`;
+            obstacle.style.top = '-50px';
+            obstacle.style.animationDuration = `${Math.random() * 3 + 2}s`;
+            
+            obstacle.addEventListener('click', () => {
+                hitObstacle(obstacle);
+            });
+            
+            gameArea.appendChild(obstacle);
+            
+            // Remove obstacle after animation
+            setTimeout(() => {
+                if (obstacle.parentNode) {
+                    gameArea.removeChild(obstacle);
+                }
+            }, 5000);
+        }
+
+        // Hit obstacle
+        function hitObstacle(obstacle) {
+            if (!isGameActive) return;
+            
+            score = Math.max(0, score - 5);
+            scoreElement.textContent = score;
+            
+            // Create effect
+            const effect = document.createElement('div');
+            effect.className = 'effect';
+            effect.innerHTML = '-5 💔';
+            effect.style.left = obstacle.style.left;
+            effect.style.top = obstacle.style.top;
+            effect.style.color = 'red';
+            gameArea.appendChild(effect);
+            
+            // Show message
+            showMessage("Careful!", parseFloat(obstacle.style.left), parseFloat(obstacle.style.top));
+            
+            // Remove obstacle
+            gameArea.removeChild(obstacle);
+            
+            setTimeout(() => {
+                if (effect.parentNode) {
+                    gameArea.removeChild(effect);
+                }
+            }, 1000);
+        }
+
+        // Create power-up
+        function createPowerUp() {
+            if (!isGameActive) return;
+            
+            const powerUp = document.createElement('div');
+            powerUp.className = 'power-up';
+            powerUp.innerHTML = '⭐';
+            powerUp.style.left = `${Math.random() * 80 + 10}%`;
+            powerUp.style.top = `${Math.random() * 60 + 10}%`;
+            
+            powerUp.addEventListener('click', () => {
+                collectPowerUp(powerUp);
+            });
+            
+            gameArea.appendChild(powerUp);
+            
+            // Remove power-up after some time
+            setTimeout(() => {
+                if (powerUp.parentNode) {
+                    gameArea.removeChild(powerUp);
+                }
+            }, 7000);
+        }
+
+        // Collect power-up
+        function collectPowerUp(powerUp) {
+            if (!isGameActive) return;
+            
+            score += 25;
+            scoreElement.textContent = score;
+            
+            // Create effect
+            const effect = document.createElement('div');
+            effect.className = 'effect';
+            effect.innerHTML = '+25 ⭐';
+            effect.style.left = powerUp.style.left;
+            effect.style.top = powerUp.style.top;
+            effect.style.color = 'gold';
+            effect.style.fontSize = '2rem';
+            gameArea.appendChild(effect);
+            
+            // Show special message
+            showMessage("For Salwa! ✨", parseFloat(powerUp.style.left), parseFloat(powerUp.style.top) - 10);
+            
+            // Remove power-up
+            gameArea.removeChild(powerUp);
+            
+            setTimeout(() => {
+                if (effect.parentNode) {
+                    gameArea.removeChild(effect);
+                }
+            }, 1000);
+        }
+
+        // Move player
+        function movePlayer(direction) {
+            if (!isGameActive) return;
+            
+            if (direction === 'left') {
+                playerX = Math.max(10, playerX - 10);
+            } else if (direction === 'right') {
+                playerX = Math.min(90, playerX + 10);
+            }
+            
+            // Visual feedback
+            actionBtn.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                actionBtn.style.transform = 'scale(1)';
+            }, 150);
+        }
+
+        // Action button
+        function performAction() {
+            if (!isGameActive) return;
+            
+            // Create temporary hearts around player
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'heart';
+                    heart.innerHTML = '💖';
+                    heart.style.left = `${playerX + (Math.random() * 20 - 10)}%`;
+                    heart.style.top = '70%';
+                    heart.style.animation = 'none';
+                    heart.style.transition = 'all 0.5s ease';
+                    
+                    heart.addEventListener('click', () => {
+                        collectHeart(heart);
+                    });
+                    
+                    gameArea.appendChild(heart);
+                    
+                    setTimeout(() => {
+                        heart.style.transform = 'scale(1.5)';
+                        heart.style.opacity = '0';
+                        setTimeout(() => {
+                            if (heart.parentNode) {
+                                gameArea.removeChild(heart);
+                            }
+                        }, 500);
+                    }, 100);
+                }, i * 200);
+            }
+            
+            // Button animation
+            actionBtn.style.transform = 'scale(1.3)';
+            setTimeout(() => {
+                actionBtn.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        // Update timer
+        function updateTimer() {
+            timeLeft--;
+            timerElement.textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        // Start game
+        function startGame() {
+            // Reset game state
+            score = 0;
+            timeLeft = 60;
+            isGameActive = true;
+            
+            // Update UI
+            scoreElement.textContent = score;
+            timerElement.textContent = timeLeft;
+            
+            // Switch screens
+            startScreen.style.transform = 'translateX(-100%)';
+            gameScreen.style.transform = 'translateX(0)';
+            
+            // Start game loops
+            gameInterval = setInterval(() => {
+                createHeart();
+                if (Math.random() < 0.3) createObstacle();
+                if (Math.random() < 0.1) createPowerUp();
+            }, 1000);
+            
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        // End game
+        function endGame() {
+            isGameActive = false;
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            
+            // Update final score
+            finalScoreElement.textContent = score;
+            
+            // Switch to win screen
+            gameScreen.style.transform = 'translateX(-100%)';
+            winScreen.style.transform = 'translateX(0)';
+            
+            // Clear game area
+            gameArea.innerHTML = '';
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', startGame);
+        restartBtn.addEventListener('click', () => {
+            winScreen.style.transform = 'translateX(100%)';
+            startScreen.style.transform = 'translateX(0)';
+        });
+
+        // Control buttons
+        leftBtn.addEventListener('click', () => movePlayer('left'));
+        rightBtn.addEventListener('click', () => movePlayer('right'));
+        actionBtn.addEventListener('click', performAction);
+
+        // Swipe controls for mobile
+        let touchStartX = 0;
+        gameArea.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        });
+        
+        gameArea.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            const diff = touchEndX - touchStartX;
+            
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    movePlayer('right');
+                } else {
+                    movePlayer('left');
+                }
+            }
+        });
+
+        // Initialize the game
+        initBackgroundHearts();
+        
+        // Add some initial hearts to start screen
+        for (let i = 0; i < 8; i++) {
+            setTimeout(createHeart, i * 300);
+        }
+    </script>
+</body>
+</html>
